@@ -1,32 +1,25 @@
-public class ProductOfArrayExceptSelf {
+import nltk
+from nltk.tokenize import word_tokenize
 
-    public static int[] productExceptSelf(int[] nums) {
-        int n = nums.length;
-        int[] result = new int[n];
+# Download 'punkt' tokenizer data if not already done
+nltk.download('punkt')
 
-        // Step 1: Compute the product of all elements to the left of each index
-        result[0] = 1; // There is no element to the left of index 0, so it should be 1.
-        for (int i = 1; i < n; i++) {
-            result[i] = result[i - 1] * nums[i - 1];
-        }
+text = "Tokenization without transformers is straightforward with tools like NLTK."
+tokens_nltk = word_tokenize(text)
+print("Tokens (NLTK):", tokens_nltk)
 
-        // Step 2: Compute the product of all elements to the right of each index
-        int rightProduct = 1; // There is no element to the right of the last index.
-        for (int i = n - 1; i >= 0; i--) {
-            result[i] *= rightProduct;
-            rightProduct *= nums[i]; // Update the rightProduct for the next iteration
-        }
+from transformers import AutoTokenizer
+import torch
 
-        return result;
-    }
+tokenizer = AutoTokenizer.from_pretrained("bert-base-uncased")
+tokens_transformers = tokenizer(text, return_tensors="pt")
+print("Transformers Tokens (input_ids):", tokens_transformers['input_ids'])
 
-    public static void main(String[] args) {
-        int[] nums = {1, 2, 3, 4};
-        int[] result = productExceptSelf(nums);
+# Convert input_ids to tokens
+tokens_transformers_list = tokenizer.convert_ids_to_tokens(tokens_transformers['input_ids'][0].tolist())
+print("Transformers Tokens (List):", tokens_transformers_list)
 
-        System.out.print("Product of array except self: ");
-        for (int val : result) {
-            System.out.print(val + " ");
-        }
-    }
-}
+# Decode back to text (skip special tokens)
+decoded_text = tokenizer.decode(tokens_transformers['input_ids'], skip_special_tokens=True)
+print("Decoded Text:", decoded_text)
+
